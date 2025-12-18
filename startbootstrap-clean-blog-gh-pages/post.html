@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>Clean Blog - RPS Battle Edition</title>
+        <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+        <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+        <link href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" rel="stylesheet" type="text/css" />
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css" />
+        <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+        <link href="css/styles.css" rel="stylesheet" />
+        <script src="https://cdn.tailwindcss.com"></script>
+        
+        <style>
+            /* Game specific styles integrated with Blog */
+            #game-container {
+                position: relative;
+                width: 100%;
+                height: 600px;
+                background: #0a0a23;
+                border-radius: 15px;
+                overflow: hidden;
+                margin: 2rem 0;
+            }
+            
+            #gameCanvas {
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(135deg, #0a0a23 0%, #000000 100%);
+            }
+
+            .stat-card {
+                background: rgba(255, 255, 255, 0.05);
+                border-radius: 8px;
+                padding: 5px;
+                text-align: center;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            #ui-overlay {
+                position: absolute;
+                top: 10px;
+                left: 10px;
+                background: rgba(0, 0, 0, 0.7);
+                padding: 15px;
+                border-radius: 10px;
+                color: white;
+                z-index: 10;
+                width: 220px;
+            }
+
+            .epic-text {
+                font-family: 'Press Start 2P', cursive;
+                text-shadow: 0 0 10px currentColor;
+            }
+
+            #winner-overlay {
+                display: none;
+                position: absolute;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.9);
+                z-index: 20;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-light" id="mainNav">
+            <div class="container px-4 px-lg-5">
+                <a class="navbar-brand" href="index.html">Home</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                    Menu
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarResponsive">
+                    <ul class="navbar-nav ms-auto py-4 py-lg-0">
+                        <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="index.html">Home</a></li>
+                        <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="about.html">About</a></li>
+                        <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="post.html">Game</a></li>
+                        <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <header class="masthead" style="background-image: url('assets/img/post-bg.jpg')">
+            <div class="container position-relative px-4 px-lg-5">
+                <div class="row gx-4 gx-lg-5 justify-content-center">
+                    <div class="col-md-10 col-lg-8 col-xl-7">
+                        <div class="post-heading">
+                            <h1>The Ultimate Logic Battle</h1>
+                            <h2 class="subheading">Rock, Paper, and Scissors clash in the void</h2>
+                            <span class="meta">
+                                Posted by
+                                <a href="#!">Game Master</a>
+                                on December 17, 2025
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <article class="mb-4">
+            <div class="container px-4 px-lg-5">
+                <div class="row gx-4 gx-lg-5 justify-content-center">
+                    <div class="col-md-10 col-lg-8 col-xl-9">
+                        <p>Welcome to the simulation. It's Rock Paper Scissors, it's not that deep.</p>
+                        
+                        <div id="game-container">
+                            <div id="ui-overlay">
+                                <div class="grid grid-cols-3 gap-1 mb-4">
+                                    <div class="stat-card"><div class="text-xs">🪨</div><div id="count-rock" class="text-xs font-bold">5</div></div>
+                                    <div class="stat-card"><div class="text-xs">📄</div><div id="count-paper" class="text-xs font-bold">5</div></div>
+                                    <div class="stat-card"><div class="text-xs">✂️</div><div id="count-scissors" class="text-xs font-bold">5</div></div>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="text-[10px]">Speed: <input type="range" id="input-speed" min="1" max="10" value="3" class="w-full" oninput="updateParams()"></div>
+                                    <div class="text-[10px]">Size: <input type="range" id="input-size" min="20" max="60" value="35" class="w-full" oninput="updateParams()"></div>
+                                </div>
+                                <button onclick="resetGame()" class="mt-3 w-full py-1 bg-purple-600 text-[10px] rounded font-bold hover:bg-purple-700 transition">RESTART</button>
+                            </div>
+
+                            <div id="winner-overlay">
+                                <div id="winner-icon" class="text-6xl mb-2"></div>
+                                <h1 id="winner-name" class="epic-text text-xl mb-4">VICTORY</h1>
+                                <button onclick="resetGame()" class="px-4 py-2 bg-white text-black text-xs font-bold rounded-full">PLAY AGAIN</button>
+                            </div>
+
+                            <canvas id="gameCanvas"></canvas>
+                        </div>
+                        <h2 class="section-heading">Eat dirt Losers</h2>
+                        <p></p>
+                        <blockquote class="blockquote"></blockquote>
+                    </div>
+                </div>
+            </div>
+        </article>
+        <footer class="border-top">
+            <div class="container px-4 px-lg-5">
+                <div class="row gx-4 gx-lg-5 justify-content-center">
+                    <div class="col-md-10 col-lg-8 col-xl-7">
+                        <div class="small text-center text-muted fst-italic">Copyright &copy; RPS Blog 2023</div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+        <script>
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            let entities = [];
+            let animationId;
+            let isGameOver = false;
+
+            const TYPES = {
+                ROCK: { id: 0, label: 'ROCK', icon: '🪨', color: '#94a3b8' },
+                PAPER: { id: 1, label: 'PAPER', icon: '📄', color: '#fef3c7' },
+                SCISSORS: { id: 2, label: 'SCISSORS', icon: '✂️', color: '#f87171' }
+            };
+
+            let params = { speed: 3, size: 35, count: 8 };
+
+            class Entity {
+                constructor(typeId, x, y) {
+                    this.type = typeId;
+                    this.x = x;
+                    this.y = y;
+                    const angle = Math.random() * Math.PI * 2;
+                    this.vx = Math.cos(angle) * params.speed;
+                    this.vy = Math.sin(angle) * params.speed;
+                    this.cooldown = 0;
+                }
+                update() {
+                    this.x += this.vx; this.y += this.vy;
+                    const r = params.size / 2;
+                    if (this.x - r < 0 || this.x + r > canvas.width) this.vx *= -1;
+                    if (this.y - r < 0 || this.y + r > canvas.height) this.vy *= -1;
+                    if (this.cooldown > 0) this.cooldown--;
+                }
+                draw() {
+                    const data = Object.values(TYPES).find(t => t.id === this.type);
+                    ctx.font = `${params.size}px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(data.icon, this.x, this.y);
+                }
+            }
+
+            function resolveCollision(a, b) {
+                const dx = b.x - a.x;
+                const dy = b.y - a.y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                const minDim = params.size;
+
+                if (dist < minDim) {
+                    if (a.type !== b.type && a.cooldown <= 0 && b.cooldown <= 0) {
+                        const diff = (a.type - b.type + 3) % 3;
+                        if (diff === 1) b.type = a.type; else a.type = b.type;
+                        a.cooldown = 10; b.cooldown = 10;
+                    }
+                    a.vx *= -1; a.vy *= -1;
+                    b.vx *= -1; b.vy *= -1;
+                }
+            }
+
+            function loop() {
+                if (isGameOver) return;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const counts = {0:0, 1:0, 2:0};
+                entities.forEach(e => {
+                    e.update(); e.draw();
+                    counts[e.type]++;
+                });
+                document.getElementById('count-rock').innerText = counts[0];
+                document.getElementById('count-paper').innerText = counts[1];
+                document.getElementById('count-scissors').innerText = counts[2];
+
+                for (let i = 0; i < entities.length; i++) {
+                    for (let j = i + 1; j < entities.length; j++) resolveCollision(entities[i], entities[j]);
+                }
+
+                if ([counts[0], counts[1], counts[2]].filter(c => c > 0).length === 1) {
+                    isGameOver = true;
+                    const winnerId = counts[0] > 0 ? 0 : counts[1] > 0 ? 1 : 2;
+                    showWin(Object.values(TYPES).find(t => t.id === winnerId));
+                }
+                animationId = requestAnimationFrame(loop);
+            }
+
+            function showWin(winner) {
+                document.getElementById('winner-overlay').style.display = 'flex';
+                document.getElementById('winner-icon').innerText = winner.icon;
+                document.getElementById('winner-name').innerText = winner.label + " WINS";
+                document.getElementById('winner-name').style.color = winner.color;
+            }
+
+            function updateParams() {
+                params.speed = parseInt(document.getElementById('input-speed').value);
+                params.size = parseInt(document.getElementById('input-size').value);
+            }
+
+            function resetGame() {
+                cancelAnimationFrame(animationId);
+                canvas.width = canvas.offsetWidth;
+                canvas.height = canvas.offsetHeight;
+                isGameOver = false;
+                document.getElementById('winner-overlay').style.display = 'none';
+                entities = [];
+                for(let t=0; t<3; t++) {
+                    for(let i=0; i<8; i++) entities.push(new Entity(t, Math.random()*canvas.width, Math.random()*canvas.height));
+                }
+                loop();
+            }
+
+            window.onload = resetGame;
+            window.onresize = () => { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; };
+        </script>
+    </body>
+</html>
